@@ -69,7 +69,6 @@ func main() {
 			break
 		}
 	}
-	// }
 }
 
 func getSshConfig(configuration Configurations) *ssh.ClientConfig {
