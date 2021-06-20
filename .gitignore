@@ -1,3 +1,4 @@
 go.sum
 *.exe
-logs.txt
+engine.log
+engine.yml

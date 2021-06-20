@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
 
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
@@ -14,7 +13,7 @@ import (
 
 func main() {
 	// Setup logging
-	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	file, err := os.OpenFile("engine.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,7 +21,7 @@ func main() {
 
 	log.SetOutput(file)
 
-	log.Println("Running on " + runtime.GOOS)
+	// log.Println("Running on " + runtime.GOOS)
 
 	// Read configuration
 	configuration := readConfiguration()
