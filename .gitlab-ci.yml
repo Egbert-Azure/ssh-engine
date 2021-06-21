@@ -12,6 +12,7 @@ stages:
 release:
   stage: release
   script:
+    - go get ssh-engine
     - for os in ${OSS}; do GOOS=$os GOARCH=${GOARCH} make cross; done
     - apt-get -qq -y install curl
     - /bin/sh makerelease.sh SshEngine
