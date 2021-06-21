@@ -1,51 +1,22 @@
 image: golang:latest
 
-variables:
-  # Please edit to your GitLab project
-  REPO_NAME: gitlab.com/matt-plays-chess/ssh-engine
-
-# The problem is that to be able to use go get, one needs to put
-# the repository in the $GOPATH. So for example if your gitlab domain
-# is gitlab.com, and that your repository is namespace/project, and
-# the default GOPATH being /go, then you'd need to have your
-# repository in /go/src/gitlab.com/namespace/project
-# Thus, making a symbolic link corrects this.
 before_script:
-  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-  - cd $GOPATH/src/$REPO_NAME
-  - go get ssh-engine
+  - export GOPATH=${CI_PROJECT_DIR}/.cache
+  - export GOARCH=386
+  - export OSS="windows linux darwin"
+  - apt-get update -qq && apt-get -y -qq install jq xxd
 
 stages:
-  - build
   - release
 
-compile:
-  stage: build
-  image: golang:latest
+release:
+  stage: release
   script:
-    - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-    - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-    - cd $GOPATH/src/$REPO_NAME
-    - go get ssh-engine
-    - env GOOS=windows GOARCH=386 go build SshEngine.go
+    - for os in ${OSS}; do GOOS=$os GOARCH=${GOARCH} make cross; done
+    - apt-get -qq -y install curl
+    - /bin/sh makerelease.sh SshEngine
   artifacts:
     paths:
-      - SshEngine.exe
-
-release_job:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  rules:
-    - if: $CI_COMMIT_TAG                  # Run this job when a tag is created manually
-  script:
-    - echo 'running release_job'
-  release:
-    name: 'Release $CI_COMMIT_TAG'
-    description: 'Created using the release-cli
-    tag_name: '$CI_COMMIT_TAG' 
-    ref: '$CI_COMMIT_TAG'
-    assets: # Optional, multiple asset links
-      links:
-        - name: 'SshEngine.exe'
-          url: 'SshEngine.exe'
+      - SshEngine_*
+  only:
+    - tags
