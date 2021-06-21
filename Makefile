@@ -1,4 +1,4 @@
-PROGNAME=goxplorer
+PROGNAME=SshEngine
 OUTPUT=${PROGNAME}_${CI_COMMIT_TAG}_${GOOS}_${GOARCH}
 
 cross:
