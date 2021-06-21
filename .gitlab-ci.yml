@@ -41,9 +41,7 @@ upload:
     - if: $CI_COMMIT_TAG
   script:
     - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${DARWIN_AMD64_BINARY} ${PACKAGE_REGISTRY_URL}
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${LINUX_AMD64_BINARY} ${PACKAGE_REGISTRY_URL}
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file SshEngine.exe
 
 release:
   stage: release
@@ -53,5 +51,4 @@ release:
   script:
     - |
       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"${DARWIN_AMD64_BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}${DARWIN_AMD64_BINARY}\"}" \
-        --assets-link "{\"name\":\"${LINUX_AMD64_BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}${LINUX_AMD64_BINARY}\"}"
+        --assets-link "{\"name\":\"SshEngine.exe\",\"url\":\"${PACKAGE_REGISTRY_URL}SshEngine.exe\"}"
