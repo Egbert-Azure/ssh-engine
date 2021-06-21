@@ -3,7 +3,7 @@ image: golang:latest
 before_script:
   - export GOPATH=${CI_PROJECT_DIR}/.cache
   - export GOARCH=386
-  - export OSS="windows linux darwin"
+  - export OSS="windows linux"
   - apt-get update -qq && apt-get -y -qq install jq xxd
 
 stages:
