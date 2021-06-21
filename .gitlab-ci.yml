@@ -23,7 +23,7 @@ stages:
 compile:
   stage: build
   script:
-    - env GOOS=windows GOARCH=386 go build SshEngine.go -o $CI_PROJECT_DIR/SshEngine.exe
+    - env GOOS=windows GOARCH=386 go build SshEngine.go
   artifacts:
     paths:
       - SshEngine.exe
