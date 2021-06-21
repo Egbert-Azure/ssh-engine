@@ -18,7 +18,7 @@ Create a filed called `engine.yml` in the same directory. The contents should lo
 
 ```yml
 user: "matt"
-privateKeyFile: "/Users/nohr/.ssh/id_rsa"
+privateKeyFile: "/Users/matt/.ssh/id_rsa"
 host: "127.0.0.1"
 port: "22"
 remoteCommand: "/home/matt/bin/stockfish"
@@ -41,3 +41,8 @@ env GOOS=windows GOARCH=386 go build SshEngine.go
 ```
 
 This will create SshEngine.exe. Copy that along with the config file to a suitable directory on Windows.
+
+## Making a Release
+
+1. Create a tag with release notes
+1. Run the CI Pipeline manually setting CI_COMMIT_TAG to match

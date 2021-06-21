@@ -18,7 +18,6 @@ before_script:
 
 stages:
   - build
-  - upload
   - release
 
 compile:
@@ -34,21 +33,19 @@ compile:
     paths:
       - SshEngine.exe
 
-upload:
-  stage: upload
-  image: curlimages/curl:latest
-  rules:
-    - if: $CI_COMMIT_TAG
-  script:
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file SshEngine.exe
-
-release:
+release_job:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:v0.4.0
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG                  # Run this job when a tag is created manually
   script:
-    - |
-      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"SshEngine.exe\",\"url\":\"${PACKAGE_REGISTRY_URL}SshEngine.exe\"}"
+    - echo 'running release_job'
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    description: 'Created using the release-cli
+    tag_name: '$CI_COMMIT_TAG' 
+    ref: '$CI_COMMIT_TAG'
+    assets: # Optional, multiple asset links
+      links:
+        - name: 'SshEngine.exe'
+          url: 'SshEngine.exe'
