@@ -26,6 +26,12 @@ port: "22"
 remoteCommand: "/home/matt/bin/stockfish"
 ```
 
+If you want to enable extra logging, add this to the configuration file with the name of your log file:
+
+```yml
+logFileName: "engine.log"
+```
+
 ## Running
 
 Run the proxy:
