@@ -1,8 +1,10 @@
-When using some chess software like Chessbase, you may need an executable that is a proxy to a remote chess engine. This simple program is just meant for that.
+When using some chess software like Chessbase, you may need an executable that is a proxy to a remote chess engine. This simple program is meant just for that.
 
 Specifically, it builds an .exe that you can point to that just connects to a remote server using SSH. There is an external config file that you use so you can change the settings without needing to build a new .exe file.
 
 This will work on linux of MacOS as well, but for those systems it may be easier to make your own script. But, if you want to use this, just build it for those environments.
+
+More details can be found here: https://mattplayschess.com/ssh-engine/
 
 ## Setup
 
