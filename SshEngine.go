@@ -12,19 +12,24 @@ import (
 )
 
 func main() {
-	// Setup logging
-	file, err := os.OpenFile("engine.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	log.SetOutput(file)
-
 	// log.Println("Running on " + runtime.GOOS)
 
 	// Read configuration
 	configuration := readConfiguration()
+	debugLogging := false
+
+	// Setup logging if a log file name was passed in
+	if configuration.LogFileName != "" {
+		file, err := os.OpenFile("engine.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		log.SetOutput(file)
+
+		debugLogging = true
+	}
 
 	server := fmt.Sprintf("%s:%s", configuration.Host, configuration.Port)
 
@@ -62,10 +67,16 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
-		log.Println("Input: " + scanner.Text())
+		if debugLogging {
+			log.Println("Input: " + scanner.Text())
+		}
+
 		fmt.Fprintf(stdin, "%s\n", scanner.Text())
 		if scanner.Text() == "quit" {
-			log.Println("Quit sent")
+			if debugLogging {
+				log.Println("Quit sent")
+			}
+
 			break
 		}
 	}
@@ -101,14 +112,22 @@ func getKeyFile(file string) (key ssh.Signer, err error) {
 }
 
 func readConfiguration() Configurations {
+	// Set the file name of the configurations file
 	viper.SetConfigName("engine")
-	viper.AddConfigPath(".")
 	viper.SetConfigType("yml")
 
+	// Set the path to look for the configurations file
+	viper.AddConfigPath(".")
+
+	// Read the Configuration
 	var configuration Configurations
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading config file, %s", err)
 	}
+
+	// Set undefined variables
+	viper.SetDefault("logFileName", "")
+
 	err := viper.Unmarshal(&configuration)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
@@ -123,4 +142,5 @@ type Configurations struct {
 	Host           string
 	Port           string
 	RemoteCommand  string
+	LogFileName    string
 }
