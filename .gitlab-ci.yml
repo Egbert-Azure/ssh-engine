@@ -19,7 +19,7 @@ build:
   script:
     - mkdir bin
     - go get ssh-engine
-    - env GOOS=windows GOARCH=386 go build -o bin/ SshEngine.go
+    - env GOOS=windows GOARCH=386 go build -o bin/${WINDOWS_BINARY} SshEngine.go
   artifacts:
     paths:
       - bin/
