@@ -1,23 +1,46 @@
-image: golang:latest
-
-before_script:
-  - export GOPATH=${CI_PROJECT_DIR}/.cache
-  - export GOARCH=386
-  - export OSS="windows linux"
-  - apt-get update -qq && apt-get -y -qq install jq xxd
-
 stages:
+  - build
+  - upload
   - release
 
-release:
-  stage: release
+variables:
+  # Package version can only contain numbers (0-9), and dots (.).
+  # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
+  # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
+  PACKAGE_VERSION: "0.0.1"
+  WINDOWS_BINARY: "SSHEngine-${PACKAGE_VERSION}.exe"
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/SSHEngine/${PACKAGE_VERSION}"
+
+build:
+  stage: build
+  image: golang:latest
+  rules:
+    - if: $CI_COMMIT_TAG
   script:
+    - mkdir bin
     - go get ssh-engine
-    - for os in ${OSS}; do GOOS=$os GOARCH=${GOARCH} make cross; done
-    - apt-get -qq -y install curl
-    - /bin/sh makerelease.sh SshEngine
+    - env GOOS=windows GOARCH=386 go build -o bin/ SshEngine.go
   artifacts:
     paths:
-      - SshEngine_*
-  only:
-    - tags
+      - bin/
+
+upload:
+  stage: upload
+  image: curlimages/curl:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/${WINDOWS_BINARY} ${PACKAGE_REGISTRY_URL}/${WINDOWS_BINARY}
+
+release:
+  # Caution, as of 2021-02-02 these assets links require a login, see:
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/299384
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
+        --assets-link "{\"name\":\"${WINDOWS_BINARY}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WINDOWS_BINARY}\"}"
