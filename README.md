@@ -44,5 +44,4 @@ This will create SshEngine.exe. Copy that along with the config file to a suitab
 
 ## Making a Release
 
-1. Create a tag with release notes
-1. Run the CI Pipeline manually setting CI_COMMIT_TAG to match
+Create a tag (format `0.0.0`) and the CI pipeline will automatically build a Windows .exe and create a release
