@@ -18,12 +18,24 @@ go get ssh-engine
 
 Create a filed called `engine.yml` in the same directory. The contents should look like this but for your configuration:
 
+Mac/Linux:
+
 ```yml
 user: "matt"
-privateKeyFile: "/Users/matt/.ssh/id_rsa"
-host: "127.0.0.1"
+privateKeyFile: "/Users/matt/.ssh/stockfish-keypair.pem"
+host: "123.45.67.8"
 port: "22"
-remoteCommand: "/home/matt/bin/stockfish"
+remoteCommand: "stockfish"
+```
+
+Windows:
+
+```yml
+user: "matt"
+privateKeyFile: "C:\\Users\\matt\\.ssh\\stockfish-keypair.pem"
+host: "123.45.67.8"
+port: "22"
+remoteCommand: "stockfish"
 ```
 
 If you want to enable extra logging, add this to the configuration file with the name of your log file:
