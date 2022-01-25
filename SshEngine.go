@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -39,13 +40,15 @@ func main() {
 	// Start the connection
 	client, err := ssh.Dial("tcp", server, sshConfig)
 	if err != nil {
-		panic("Failed to dial: " + err.Error())
+		fmt.Printf("Could not connect to ssh (failed to dial). Error is: %s\n", err)
+		os.Exit(1)
 	}
 
 	// Start a session
 	session, err := client.NewSession()
 	if err != nil {
-		panic("Failed to create session: " + err.Error())
+		fmt.Printf("Failed to create ssh session. Error is: %s\n", err)
+		os.Exit(1)
 	}
 	defer session.Close()
 
@@ -57,7 +60,8 @@ func main() {
 
 	// Start remote shell
 	if err := session.Shell(); err != nil {
-		log.Fatalf("failed to start shell: %s", err)
+		fmt.Printf("Failed to start shell. Error is: %s\n", err)
+		os.Exit(1)
 	}
 
 	// Run the supplied command first
@@ -85,7 +89,8 @@ func main() {
 func getSshConfig(configuration Configurations) *ssh.ClientConfig {
 	key, err := getKeyFile(configuration.PrivateKeyFile)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Could not read privateKeyFile at %s\n", configuration.PrivateKeyFile)
+		os.Exit(1)
 	}
 
 	sshConfig := &ssh.ClientConfig{
@@ -102,16 +107,24 @@ func getSshConfig(configuration Configurations) *ssh.ClientConfig {
 func getKeyFile(file string) (key ssh.Signer, err error) {
 	buf, err := ioutil.ReadFile(file)
 	if err != nil {
+		fmt.Printf("Error reading the key file. Error is: %s\n", err)
 		return
 	}
 	key, err = ssh.ParsePrivateKey(buf)
 	if err != nil {
+		fmt.Printf("Error parsing the private key file. Is this a valid private key? Error is: %s\n", err)
 		return
 	}
 	return
 }
 
 func readConfiguration() Configurations {
+	if _, err := os.Stat("engine.yml"); errors.Is(err, os.ErrNotExist) {
+		// path/to/whatever does not exist
+		fmt.Println("The file 'engine.yml' could not be found in the current directory")
+		os.Exit(1)
+	}
+
 	// Set the file name of the configurations file
 	viper.SetConfigName("engine")
 	viper.SetConfigType("yml")
@@ -122,7 +135,16 @@ func readConfiguration() Configurations {
 	// Read the Configuration
 	var configuration Configurations
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file, %s", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+			fmt.Println("No such config file")
+			os.Exit(1)
+		} else {
+			// Config file was found but another error was produced
+			fmt.Printf("Error reading the engine.yml file, %s", err)
+			os.Exit(1)
+		}
+
 	}
 
 	// Set undefined variables
@@ -130,7 +152,8 @@ func readConfiguration() Configurations {
 
 	err := viper.Unmarshal(&configuration)
 	if err != nil {
-		fmt.Printf("Unable to decode into struct, %v", err)
+		fmt.Printf("Unable to decode the engine.yml file, %v", err)
+		os.Exit(1)
 	}
 
 	return configuration
