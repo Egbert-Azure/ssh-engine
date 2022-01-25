@@ -65,3 +65,8 @@ This will create SshEngine.exe. Copy that along with the config file to a suitab
 ## Making a Release
 
 Create a tag (format `0.0.0`) and the CI pipeline will automatically build a Windows .exe and create a release
+
+```
+git tag 0.0.3
+git push origin --tags
+```
